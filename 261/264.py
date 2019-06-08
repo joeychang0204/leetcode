@@ -1,20 +1,16 @@
 class Solution:
     def nthUglyNumber(self, n: int) -> int:
-        if n == 1:
-            return 1
         uglyNums = [1]
-        p1, p2, p3 = 0, 0, 0
+        p2, p3, p5 = 0, 0, 0
         while len(uglyNums) < n:
-            newUgly = min(uglyNums[p1]*2, uglyNums[p2]*3, uglyNums[p3]*5)
-            if newUgly == uglyNums[p1]*2:
-                p1 += 1
-            if newUgly == uglyNums[p2]*3:
+            uglyNums.append(min(uglyNums[p2]*2, uglyNums[p3]*3, uglyNums[p5]*5))
+            # for 6, we have to increment both p2 and p3
+            if uglyNums[-1] == uglyNums[p2]*2:
                 p2 += 1
-            if newUgly == uglyNums[p3]*5:
+            if uglyNums[-1] == uglyNums[p3]*3:
                 p3 += 1
-            uglyNums.append(newUgly)
-            print(uglyNums, p1, p2, p3)
+            if uglyNums[-1] == uglyNums[p5]*5:
+                p5 += 1
         return uglyNums[-1]
+
         
-    
-print(Solution().nthUglyNumber(10))
