@@ -15,8 +15,11 @@ class Solution(object):
         pq = PriorityQueue()
         for l in lists:
             if l:
+                # (there are 2 brackets, the inner one is for tuple(key, item))
                 pq.put((l.val, l))
+        # while pq is not valid, will loop infinitely
         while pq.qsize()>0:
+            # will delete the first item in priority queue and return the item
             cur = pq.get()[1]
             if cur.next:
                 pq.put((cur.next.val, cur.next))

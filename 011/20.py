@@ -4,16 +4,16 @@ class Solution(object):
         :type s: str
         :rtype: bool
         """
-        queue = []
+        stack = []
         for i, ch in enumerate(s):
             if ch in ['(', '[', '{']:
-                queue.append(ch)
+                stack.append(ch)
             else:
                 if not queue:
                     return False
-                if (ch == '}' and queue[-1] != '{' ) or (ch == ']' and queue[-1] != '[' ) or (ch == ')' and queue[-1] != '(' ):
+                if (ch == '}' and stack[-1] != '{' ) or (ch == ']' and stack[-1] != '[' ) or (ch == ')' and stack[-1] != '(' ):
                     return False
-                queue.pop(-1)
-        if queue:
+                stack.pop(-1)
+        if stack:
             return False
         return True

@@ -10,6 +10,7 @@ class Solution(object):
         for i in range(3, n+1):
             fac[i] = i * fac[i-1]
         fac[0] = 1
+        print(fac)
         cur = 0
         res = ''
         while len(res) < n:

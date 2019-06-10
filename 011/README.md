@@ -195,13 +195,13 @@ class Solution(object):
 ```
 </p></details>
 
-## Q
-description
+## 16. 3Sum Closest
+Given an array nums of n integers and an integer target, find three integers in nums such that the sum is closest to target. Return the sum of the three integers. You may assume that each input would have exactly one solution.  
 
 <details><summary>sol</summary>
 <p>
 
-#### hint
+#### Using the means similar to 3Sum, nothing special. time=O(n^2), space=O(1)
 
 </p></details>
 
@@ -209,17 +209,39 @@ description
 <p>
 
 ```python
-code
+class Solution(object):
+    def threeSumClosest(self, nums, target):
+        """
+        :type nums: List[int]
+        :type target: int
+        :rtype: int
+        """
+        res = nums[0] + nums[1] + nums[2]
+        nums.sort()
+        for i, num in enumerate(nums):
+            l, r = i+1, len(nums)-1
+            while l < r:
+                cur = num + nums[l] + nums[r]
+                if abs(cur - target) < abs(res - target):
+                    res = cur
+                if cur < target:
+                    l += 1
+                elif cur > target:
+                    r -= 1
+                else:
+                    return cur
+        return res
 ```
 </p></details>
 
-## Q
-description
+## 17. Letter Combination of a Phone Number
+Given a string containing digits from 2-9 inclusive, return all possible letter combinations that the number could represent.  
+A mapping of digit to letters (just like on the telephone buttons) is given below. Note that 1 does not map to any letters.  
 
-<details><summary>sol</summary>
+<details><summary>sol1</summary>
 <p>
 
-#### hint
+#### backtracking. time=O(3^N * 4^M) since some digits have 4 choices. space=O(3^N * 4^M) for solution.
 
 </p></details>
 
@@ -227,17 +249,34 @@ description
 <p>
 
 ```python
-code
+class Solution(object):
+    def letterCombinations(self, digits):
+        """
+        :type digits: str
+        :rtype: List[str]
+        """
+        m = [['0'], ['0'], ['a', 'b', 'c'], ['d', 'e', 'f'], ['g', 'h', 'i'], ['j', 'k', 'l'], ['m', 'n', 'o'], ['p', 'q', 'r', 's'], ['t', 'u', 'v'], ['w', 'x', 'y', 'z']]
+        res = []
+        if not digits:
+            return []
+        
+        def backtracking(s, cur):
+            if len(s) == len(digits):
+                res.append(s)
+                return
+            for c in m[int(digits[cur])]:
+                s = s + c
+                backtracking(s, cur+1)
+                s = s[:-1]
+        backtracking('', 0)
+        return res 
 ```
 </p></details>
 
-## Q
-description
-
-<details><summary>sol</summary>
+<details><summary>sol2</summary>
 <p>
 
-#### hint
+#### iterative. time=O(3^N * 4^M) , space=O(3^N * 4^M) for solution.
 
 </p></details>
 
@@ -245,17 +284,35 @@ description
 <p>
 
 ```python
-code
+class Solution(object):
+    def letterCombinations(self, digits):
+        """
+        :type digits: str
+        :rtype: List[str]
+        """
+        m = ['0', '0', 'abc', 'def', 'ghi', 'jkl', 'mno', 'pqrs', 'tuv', 'wxyz']
+        all_combination = ['']
+        if not digits:
+            return []
+        
+        for digit in digits:
+            cur_combination = []
+            for letter in m[int(digit)]:
+                for combination in all_combination:
+                    cur_combination.append(combination + letter)
+            all_combination = cur_combination
+        return all_combination
 ```
 </p></details>
 
-## Q
-description
-
+## 18. 4Sum
+Given an array nums of n integers and an integer target, are there elements a, b, c, and d in nums such that a + b + c + d = target? Find all unique quadruplets in the array which gives the sum of target.  
+Note:  
+The solution set must not contain duplicate quadruplets.  
 <details><summary>sol</summary>
 <p>
 
-#### hint
+#### Like 3 sum, but 2 for loops outside the final 2Sum. For N sum problems, we can solve it recursively and finally make it to 2Sum.  time=O(n^3), space=O(n)
 
 </p></details>
 
@@ -263,17 +320,46 @@ description
 <p>
 
 ```python
-code
+class Solution(object):
+    def fourSum(self, nums, target):
+        """
+        :type nums: List[int]
+        :type target: int
+        :rtype: List[List[int]]
+        """
+        nums.sort()
+        res = []
+        used = set()
+        for i in range(len(nums)):
+            for j in range(i+1, len(nums)):
+                if (nums[i], nums[j]) in used:
+                    continue
+                cur = nums[i] + nums[j]
+                l, r = j+1, len(nums)-1
+                while l < r:
+                    if cur + nums[l] + nums[r] < target:
+                        l += 1
+                    elif cur + nums[l] + nums[r] > target:
+                        r -= 1
+                    else:
+                        res.append([nums[i], nums[j], nums[l], nums[r]])
+                        l, r = l+1, r-1
+                        while l < r and nums[l] == nums[l-1]:
+                            l += 1
+                        while l < r and nums[r] == nums[r+1]:
+                            r -= 1
+                used.add((nums[i], nums[j]))
+        return res
 ```
 </p></details>
 
-## Q
-description
+## 19. Remove nth node from end of List
+Given a linked list, remove the n-th node from the end of list and return its head.
 
 <details><summary>sol</summary>
 <p>
 
-#### hint
+#### slow = fast = res = ListNode(0), res.next = head. fast move n+1 forward before slow move. time=O(n), space=O(1)
 
 </p></details>
 
@@ -281,6 +367,62 @@ description
 <p>
 
 ```python
-code
+class Solution(object):
+    def removeNthFromEnd(self, head, n):
+        """
+        :type head: ListNode
+        :type n: int
+        :rtype: ListNode
+        """
+        res = slow = fast = ListNode(0)
+        res.next = head
+        for i in range(n + 1):
+            fast = fast.next
+        while fast:
+            fast = fast.next
+            slow = slow.next
+        slow.next = slow.next.next
+        return res.next
+```
+</p></details>
+
+## 20. Valid Parenthesis
+Given a string containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid.  
+An input string is valid if:  
+Open brackets must be closed by the same type of brackets.  
+Open brackets must be closed in the correct order.  
+Note that an empty string is also considered valid.  
+
+<details><summary>sol</summary>
+<p>
+
+#### Use a stack, check the last element. test case : (  ,  ((,   ]. time=O(n), space=O(n)
+
+</p></details>
+
+<details><summary>code</summary>
+<p>
+
+```python
+class Solution(object):
+    def isValid(self, s):
+        """
+        :type s: str
+        :rtype: bool
+        """
+        stack = []
+        for i, ch in enumerate(s):
+            if ch in ['(', '[', '{']:
+                stack.append(ch)
+            else:
+                if not queue:
+                    return False
+                if (ch == '}' and stack[-1] != '{' ) or (ch == ']' and stack[-1] != '[' ) or (ch == ')' and stack[-1] != '(' ):
+                    return False
+                stack.pop(-1)
+        if stack:
+            return False
+        return True
+
 ```
 </p></details>
