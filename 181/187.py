@@ -1,21 +1,7 @@
-class Solution(object):
-    def findRepeatedDnaSequences(self, s):
-        """
-        :type s: str
-        :rtype: List[str]
-        """
-        d = {}
-        res = []
-        cur = ""
-        l, r = 0, 9
-        while r < len(s):
-            cur = s[l:r+1]
-            if cur in d:
-                if d[cur] == 1:
-                    res.append(cur)
-                d[cur] += 1
-            else:
-                d[cur] = 1
-            #Don't forget this ZZZ
-            l, r = l+1, r+1
-        return res
+class Solution:
+    def findRepeatedDnaSequences(self, s: str) -> List[str]:
+        seen, repeated = set(), set()
+        for i in range(len(s)-9):
+            cur = s[i:i+10]
+            repeated.add(cur) if cur in seen else seen.add(cur)
+        return list(repeated)

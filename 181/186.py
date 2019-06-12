@@ -1,17 +1,15 @@
-class Solution(object):
-    def reverseWords(self, str):
+class Solution:
+    def reverseWords(self, s: List[str]) -> None:
         """
-        :type str: List[str]
-        :rtype: void Do not return anything, modify str in-place instead.
+        Do not return anything, modify s in-place instead.
         """
-        str.reverse()
+        s.reverse()
         start = 0
-        for i, ch in enumerate(str):
-            if ch == " " or i == len(str)-1:
+        for i, ch in enumerate(s):
+            if ch == " " or i == len(s)-1:
                 l = start
-                # don't reverse the spaces!!
                 r = i-1 if ch==" " else i
                 while l < r:
-                    str[l], str[r] = str[r], str[l]
+                    s[l], s[r] = s[r], s[l]
                     l, r = l+1, r-1
                 start = i + 1

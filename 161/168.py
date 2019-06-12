@@ -4,8 +4,8 @@ class Solution(object):
         :type n: int
         :rtype: str
         """
-        ch = ['Z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K','L', 'M', 'N','O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y','Z']
-        #ch = ['Z'] + [chr(ord('A') + i) for i in range(26)]
+        #ch = ['Z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K','L', 'M', 'N','O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y','Z']
+        ch = ['Z'] + [chr(ord('A') + i) for i in range(26)]
         res = ""
         while n > 0:
             res += ch[n%26]
