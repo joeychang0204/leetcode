@@ -20,7 +20,7 @@ class Solution(object):
         if not head or not head.next:
             return head
         newHead = self.reverseList(head.next)
-        #WOW!! head.next.next so brilliant!
+        #WOW!!
         head.next.next = head
         head.next = None
         return newHead
