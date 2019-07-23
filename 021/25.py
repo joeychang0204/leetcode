@@ -39,6 +39,7 @@ class Solution(object):
             if count < k:
                 break
             if count == k:
+                # 1-4
                 nxt = tail
                 for _ in range(count):
                     head_next = head.next

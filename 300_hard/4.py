@@ -8,7 +8,6 @@ class Solution(object):
         A, B, m, n = nums1, nums2, len(nums1), len(nums2)
         if m > n:   #make sure len(A) < len(B)
             A, B, m, n = B, A, n, m
-        # the initialization of r should be m
         l, r, halfLen = 0, m, (n+m+1)/2
         while l <= r:
             i = (l+r)/2
@@ -18,7 +17,6 @@ class Solution(object):
             elif i < m and A[i] < B[j-1]:
                 l = i + 1
             else:   #good i partition
-                # checking corner cases
                 if i == 0:
                     Lmax = B[j-1]
                 elif j == 0:

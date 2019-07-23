@@ -176,36 +176,24 @@ Given a string s, find the longest palindromic substring in s. You may assume th
 <p>
 
 ```python
-class Solution(object):
-    def longestPalindrome(self, s):
-        """
-        :type s: str
-        :rtype: str
-        """
-        res = ''
-        for i in range(len(s)):
-            j = 1
-            cur = s[i]
-            while i-j >= 0 and i+j < len(s):
-                if s[i-j] == s[i+j]:
-                    cur = s[i-j] + cur + s[i+j]
-                    j += 1
-                else:
-                    break
-            if len(cur) > len(res):
-                res = cur
-            if i < len(s) - 1 and s[i] == s[i+1]:
-                j = 1
-                cur = s[i] + s[i]
-                while i-j >= 0 and i+1+j < len(s):
-                    if s[i-j] == s[i+1+j]:
-                        cur = s[i-j] + cur + s[i-j]
-                        j += 1
-                    else:
-                        break
-            if len(cur) > len(res):
-                res = cur
-        return res
+class Solution:
+    def longestPalindrome(self, s: str) -> str:
+        start, end = 0, 0
+        
+        def expand(left: int, right: int):
+            while  left >= 0 and right <= len(s)-1 and s[left] == s[right]:
+                left, right = left-1, right+1
+            return left+1, right-1
+        
+        for i, letter in enumerate(s):
+            l, r = expand(i, i)
+            if r - l > end - start:
+                start, end = l, r
+            l, r = expand(i-1, i)
+            if r - l > end - start:
+                start, end = l, r
+
+        return s[start:end+1]
 ```
 </p></details>
 
