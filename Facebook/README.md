@@ -912,6 +912,1184 @@ class Solution:
 ```
 </p></details>
 
+## 125. Valid Palindrome
+Given a string, determine if it is a palindrome, considering only alphanumeric characters and ignoring cases.  
+
+Note: For the purpose of this problem, we define empty string as valid palindrome.
+
+<details><summary>sol1</summary>
+<p>
+
+#### Use a new string to store alphanumeric. space=O(n), time=O(n)
+
+</p></details>
+
+<details><summary>code</summary>
+<p>
+
+```python
+class Solution:
+    def isPalindrome(self, s: str) -> bool:
+        s = s.lower()
+        new_s = ''
+        for letter in s:
+            if letter.isalpha() or letter.isnumeric():
+                new_s += letter
+        return new_s == new_s[::-1]
+```
+</p></details>
+
+<details><summary>sol2</summary>
+<p>
+
+#### Two pointers left and right, skip the invalid characters. use str.isalnum() to check if str is alphanumeric. time=O(n), space=O(1)
+
+<details><summary>code</summary>
+<p>
+
+```python
+class Solution:
+    def isPalindrome(self, s: str) -> bool:
+        s = s.lower()
+        l, r = 0, len(s) - 1
+        while l < r:
+            if not s[l].isalnum():
+                l += 1
+            elif not s[r].isalnum():
+                r -= 1
+            else:
+                if s[l] != s[r]:
+                    return False
+                l += 1
+                r -= 1
+        return True
+```
+</p></details>
+
+## 173. Binary Search Tree Iterator
+Implement an iterator over a binary search tree (BST). Your iterator will be initialized with the root node of a BST.  
+Calling next() will return the next smallest number in the BST.
+
+<details><summary>sol1</summary>
+<p>
+
+#### cheating traverse all in advance. time=O(1), space=O(n)
+
+</p></details>
+
+<details><summary>code</summary>
+<p>
+
+```python
+class BSTIterator:
+
+    def __init__(self, root: TreeNode):
+        self.node_vals = []
+        self.ptr = 0
+        def dfs(node):
+            if not node:
+                return
+            dfs(node.left)
+            self.node_vals.append(node.val)
+            dfs(node.right)
+        dfs(root)
+        
+
+    def next(self) -> int:
+        """
+        @return the next smallest number
+        """
+        self.ptr += 1
+        return self.node_vals[self.ptr - 1]
+
+    def hasNext(self) -> bool:
+        """
+        @return whether we have a next smallest number
+        """
+        return self.ptr < len(self.node_vals)
+```
+</p></details>
+
+<details><summary>sol2</summary>
+<p>
+
+#### use a stack to store nodes, push all of the left nodes at once. In next, pop the last node and pushLeft(node.right). time=O(n) for n nodes, space=O(n)
+
+</p></details>
+
+<details><summary>code</summary>
+<p>
+
+```python
+class BSTIterator(object):
+
+    def __init__(self, root):
+        """
+        :type root: TreeNode
+        """
+        self.nodes = []
+        self.pushLeft(root)
+        
+
+    def next(self):
+        """
+        @return the next smallest number
+        :rtype: int
+        """
+        node = self.nodes.pop()
+        self.pushLeft(node.right)
+        return node.val
+
+    def hasNext(self):
+        """
+        @return whether we have a next smallest number
+        :rtype: bool
+        """
+        return len(self.nodes) > 0
+    def pushLeft(self, node):
+        while node:
+            self.nodes.append(node)
+            node = node.left
+```
+</p></details>
+
+## 76. Minimum Window Substring
+Given a string S and a string T, find the minimum window in S which will contain all the characters in T in complexity O(n).
+
+<details><summary>sol</summary>
+<p>
+
+#### Sliding window with two pointers. Use two counters for the requirement and current substring. Use a variable to keep track of how many requirements we're meeting.
+#### time=O(n), space=O(n)
+
+</p></details>
+
+<details><summary>code</summary>
+<p>
+
+```python
+class Solution:
+    def minWindow(self, s1: str, s2: str) -> str:
+        req = collections.Counter(s2)
+        s1_c = collections.defaultdict(int)
+        l, r, cur = 0, 0, 0
+        res = [float('inf'), 0, 0]
+        while r < len(s1):
+            added = s1[r]
+            s1_c[added] += 1
+            if added in req and s1_c[added] == req[added]:
+                cur += 1
+                
+            while l <= r and cur == len(req):
+                if (r - l + 1) < res[0]:
+                    res = [r - l + 1, l, r]
+                prev = s1[l]
+                s1_c[prev] -= 1
+                if prev in req and s1_c[prev] == req[prev] - 1:
+                    cur -= 1
+                l += 1
+            r += 1
+        return s1[res[1]: res[2]+1] if res[0] != float('inf') else ''
+```
+</p></details>
+
+## 304. Range Sum Query 2D - Immutable
+Given a 2D matrix matrix, find the sum of the elements inside the rectangle defined by its upper left corner (row1, col1) and lower right corner (row2, col2).  
+
+<details><summary>sol</summary>
+<p>
+
+#### The function would be called for many times, need to do preprocessing. Calculate each element's cumulative sum from (0,0), make them as the lower right corner. And then we can compute the rectangle sum in O(1).
+#### initialize time = O(mn), space=O(mn). function time=O(1), space=O(1)
+
+</p></details>
+
+<details><summary>code</summary>
+<p>
+
+```python
+class NumMatrix:
+
+    def __init__(self, matrix: List[List[int]]):
+        # empty matrix?
+        self.lower_right = [[0] * len(matrix[0]) for _ in range(len(matrix))]
+        for row, cur_row in enumerate(matrix):
+            row_sum = 0
+            for col, num in enumerate(cur_row):
+                row_sum += matrix[row][col]
+                self.lower_right[row][col] += row_sum
+                if row > 0:
+                    self.lower_right[row][col] += self.lower_right[row - 1][col]
+                
+
+    def sumRegion(self, row1: int, col1: int, row2: int, col2: int) -> int:
+        sum1 = self.lower_right[row2][col2]
+        sum2 = 0 if col1 == 0 else self.lower_right[row2][col1 - 1]
+        sum3 = 0 if row1 == 0 else self.lower_right[row1 - 1][col2]
+        sum4 = 0 if col1 == 0 or row1 == 0 else self.lower_right[row1 - 1][col1 - 1]
+        return sum1 - sum2 - sum3 + sum4
+```
+</p></details>
+
+## 438. Find All Anagrams in a String
+Given a string s and a non-empty string p, find all the start indices of p's anagrams in s.  
+Strings consists of lowercase English letters only and the length of both strings s and p will not be larger than 20,100.  
+The order of output does not matter.  
+
+<details><summary>sol1</summary>
+<p>
+
+#### using two counters. Compare them everytime. 
+#### time = O(n^2)??, space=O(n)
+
+</p></details>
+
+<details><summary>code</summary>
+<p>
+
+```python
+class Solution:
+    def findAnagrams(self, s: str, p: str) -> List[int]:
+        s_counter = collections.Counter(s[:len(p)])
+        p_counter = collections.Counter(p)
+        l, r = 0, len(p) - 1
+        res = []
+        while r < len(s):
+            if s_counter == p_counter:
+                res.append(l)
+            l, r = l + 1, r + 1
+            if r == len(s):
+                break
+            if s_counter[s[l-1]] == 1:
+                # Counter can also pop by key
+                s_counter.pop(s[l-1])
+            else:
+                s_counter[s[l-1]] -= 1
+            # default value of Counter is 0, can += 1 directly
+            s_counter[s[r]] += 1
+        return res
+            
+```
+</p></details>
+
+<details><summary>sol2</summary>
+<p>
+
+#### First get the required string's counter. Keep moving right pointer and update the counter. If counter[A] > 0, means it is required so missing -= 1. When moving left pointer, counter[A] >= 0 means we are discarding something required, so missing += 1.
+#### time = O(n), space=O(n)
+
+</p></details>
+
+<details><summary>code</summary>
+<p>
+
+```python
+class Solution:
+    def findAnagrams(self, s: str, p: str) -> List[int]:
+        req = collections.Counter(p)
+        l, r = 0, 0
+        res = []
+        missing = len(p)
+        while r < len(s):
+            if req[s[r]] > 0:
+                missing -= 1
+            req[s[r]] -= 1
+            
+            if missing == 0:
+                res.append(l)
+            if r - l + 1 == len(p):
+                if req[s[l]] >= 0:
+                    missing += 1
+                req[s[l]] += 1
+                l += 1
+            r += 1
+        return res
+
+```
+</p></details>
+
+## 785. Is Graph Bipartite?
+Given an undirected graph, return true if and only if it is bipartite.  
+Recall that a graph is bipartite if we can split it's set of nodes into two independent subsets A and B such that every edge in the graph has one node in A and another node in B.  
+The graph is given in the following form: graph[i] is a list of indexes j for which the edge between nodes i and j exists.  Each node is an integer between 0 and graph.length - 1.  There are no self edges or parallel edges: graph[i] does not contain i, and it doesn't contain any element twice.
+
+<details><summary>sol</summary>
+<p>
+
+#### DFS. All of current node's neighbors should be in the opposite set(color).
+#### time = O(n), space = O(n)
+
+</p></details>
+
+<details><summary>code</summary>
+<p>
+
+```python
+class Solution:
+    def isBipartite(self, graph: List[List[int]]) -> bool:
+        if not graph:
+            return False
+        color = {}
+        def dfs(node, cur_color):
+            for neighbor in graph[node]:
+                if neighbor in color:
+                    if color[neighbor] == cur_color:
+                        return False
+                else:
+                    color[neighbor] = 1 - cur_color
+                    if not dfs(neighbor, 1 - cur_color):
+                        return False
+            return True
+        for i in range(len(graph)):
+            if i not in color:
+                if not dfs(i, 0):
+                    return False
+        return True
+```
+</p></details>
+
+## 680. Valid Palindrome II
+Given a non-empty string s, you may delete at most one character. Judge whether you can make it a palindrome.
+
+<details><summary>sol</summary>
+<p>
+
+#### Use a seperate function to check palindrome in a range without removing.
+#### time = O(n), space = O(1)
+
+</p></details>
+
+<details><summary>code</summary>
+<p>
+
+```python
+class Solution:
+    def validPalindrome(self, s: str) -> bool:
+        def is_pali(l, r):
+            while l < r:
+                if s[l] != s[r]:
+                    return False
+                l += 1
+                r -= 1
+            return True
+        l, r = 0, len(s) - 1
+        while l < r:
+            if s[l] == s[r]:
+                l += 1
+                r -= 1
+            else:
+                return is_pali(l, r - 1) or is_pali(l+1, r)
+        return True
+```
+</p></details>
+
+## 124. Binary Tree Maximum Path Sum
+Given a non-empty binary tree, find the maximum path sum.  
+For this problem, a path is defined as any sequence of nodes from some starting node to any node in the tree along the parent-child connections. The path must contain at least one node and does not need to go through the root.  
+
+
+
+<details><summary>sol</summary>
+<p>
+
+#### Simple recursion. compare result with node.val+l+r, but return node.val+max(l, r)
+#### time = O(n), space=O(H) where H is the tree's height.
+
+</p></details>
+
+<details><summary>code</summary>
+<p>
+
+```python
+class Solution:
+    def maxPathSum(self, root: TreeNode) -> int:
+        self.res = -float('inf')
+        def dfs(node):
+            if not node:
+                return 0
+            l = max(0, dfs(node.left))
+            r = max(0, dfs(node.right))
+            self.res = max(self.res, l + r + node.val)
+            return node.val + max(l, r)
+        dfs(root)
+        return self.res
+
+```
+</p></details>
+
+## 340. Longest Substring with At Most K Distinct Characters
+Given a string, find the length of the longest substring T that contains at most k distinct characters.
+
+<details><summary>sol</summary>
+<p>
+
+#### Sliding window with two pointers left and right. Use a counter to record the substring characters.
+#### time = O(n), space = O(k)
+
+</p></details>
+
+<details><summary>code</summary>
+<p>
+
+```python
+class Solution:
+    def lengthOfLongestSubstringKDistinct(self, s: str, k: int) -> int:
+        res = 0
+        counter = collections.defaultdict(int)
+        l, r = 0, 0
+        while r < len(s):
+            counter[s[r]] += 1
+            while len(counter) > k and l <= r:
+                if counter[s[l]] == 1:
+                    counter.pop(s[l])
+                else:
+                    counter[s[l]] -= 1
+                l += 1
+            res = max(res, r - l + 1)
+            r += 1
+        return res
+```
+</p></details>
+
+## 211. Add and Search Word - Data structure design
+Design a data structure that supports the following two operations:  
+void addWord(word)  
+bool search(word)  
+search(word) can search a literal word or a regular expression string containing only letters a-z or '.'.  
+A '.' means it can represent any one letter.  
+
+<details><summary>sol</summary>
+<p>
+
+#### trie + DFS, addWord time=O(n), where n=word's length. search time=O(m), where m is the number of trieNodes. 
+
+</p></details>
+
+<details><summary>code</summary>
+<p>
+
+```python
+class WordDictionary:
+
+    def __init__(self):
+        """
+        Initialize your data structure here.
+        """
+        self.root = trie_node()
+
+    def addWord(self, word: str) -> None:
+        """
+        Adds a word into the data structure.
+        """
+        node = self.root
+        for letter in word:
+            if letter not in node.children:
+                node.children[letter] = trie_node()
+            node = node.children[letter]
+        node.isEnd = True
+        
+
+    def search(self, word: str) -> bool:
+        """
+        Returns if the word is in the data structure. A word could contain the dot character '.' to represent any one letter.
+        """
+        self.res = False
+        def search_node(node, start):
+            if start == len(word):
+                if node.isEnd:
+                    self.res = True
+                return
+            letter = word[start]
+            if letter == '.':
+                for child in node.children.values():
+                    search_node(child, start + 1)
+            else:
+                if letter not in node.children:
+                    return
+                search_node(node.children[letter],start + 1)
+        search_node(self.root,  0)
+        return self.res
+
+class trie_node:
+    def __init__(self):
+        self.children = {}
+        self.isEnd = False
+```
+</p></details>
+
+## 269. Alien Dictionary
+There is a new alien language which uses the latin alphabet. However, the order among letters are unknown to you. You receive a list of non-empty words from the dictionary, where words are sorted lexicographically by the rules of this new language. Derive the order of letters in this language.
+
+<details><summary>sol</summary>
+<p>
+
+#### topological sort. Remember to handle all characters appeared in words.
+#### preprocessing time = O(mn) where m is the length of word. topological sort time=O(V+E) where V is the letter count and E is the edge count. space = O(E)
+
+</p></details>
+
+<details><summary>code</summary>
+<p>
+
+```python
+class Solution:
+    def alienOrder(self, words: List[str]) -> str:
+        # case: ['z', 'z']
+        edges = collections.defaultdict(list)
+        inDegree = collections.defaultdict(int)
+        zeroDegree = []
+        # set('yuan') -> {'y', 'u', 'a', 'n'}
+        all_letters = set(''.join(words))
+        print(all_letters)
+        for i in range(1, len(words)):
+            word1, word2 = words[i-1], words[i]
+            len1, len2 = len(word1), len(word2)
+            # find the first different letter. Don't forget to break!
+            for j in range(min(len1, len2)):
+                if word1[j] != word2[j]:
+                    inDegree[word2[j]] += 1
+                    edges[word1[j]].append(word2[j])
+                    break
+        res = ''
+        # find the zero degrees
+        for letter in all_letters:
+            if inDegree[letter] == 0:
+                zeroDegree.append(letter)
+        while zeroDegree:
+            cur = zeroDegree.pop()
+            res += cur
+            for neighbor in edges[cur]:
+                inDegree[neighbor] -= 1
+                if inDegree[neighbor] == 0:
+                    zeroDegree.append(neighbor)
+        return '' if len(res) != len(all_letters) else res
+```
+</p></details>
+
+## 314. Binary Tree Vertical Order Traversal
+Given a binary tree, return the vertical order traversal of its nodes' values. (ie, from top to bottom, column by column).  
+If two nodes are in the same row and column, the order should be from left to right.  
+
+<details><summary>sol</summary>
+<p>
+
+#### BFS recording x position. Can't use DFS since have to output from top to bottom. Outputing is a little tricky using sorted.
+#### time = O(nlogn), space=O(n)
+
+</p></details>
+
+<details><summary>code</summary>
+<p>
+
+```python
+class Solution:
+    def verticalOrder(self, root: TreeNode) -> List[List[int]]:
+        if not root:
+            return
+        d = collections.defaultdict(list)
+        queue = [(root, 0)]
+        while queue:
+            node = queue.pop(0)
+            d[node[1]].append(node[0].val)
+            if node[0].left:
+                queue.append((node[0].left, node[1] - 1))
+            if node[0].right:
+                queue.append((node[0].right, node[1] + 1))
+                
+        return [d[i] for i in sorted(d.keys())]
+
+```
+</p></details>
+
+## 986. Interval List Intersections
+Given two lists of closed intervals, each list of intervals is pairwise disjoint and in sorted order.  
+Return the intersection of these two interval lists.  
+(Formally, a closed interval [a, b] (with a <= b) denotes the set of real numbers x with a <= x <= b.  The intersection of two closed intervals is a set of real numbers that is either empty, or can be represented as a closed interval.  For example, the intersection of [1, 3] and [2, 4] is [2, 3].)  
+
+<details><summary>sol</summary>
+<p>
+
+#### if max(start) <= min(end), append [max_start, min_end] to answer.
+#### time = O(m+n), space=O(1)
+
+</p></details>
+
+<details><summary>code</summary>
+<p>
+
+```python
+class Solution:
+    def intervalIntersection(self, A: List[List[int]], B: List[List[int]]) -> List[List[int]]:
+        # A: [[2,5], [6,7], [9,15]]
+        # B : [[3,4], [5,8], [10,13]]
+        # [3,4], [5,5], [6,7], [10,13]
+        i, j = 0, 0
+        res = []
+        while i < len(A) and j < len(B):
+            inter_A, inter_B = A[i], B[j]
+            if inter_B[0] <= inter_A[1] or inter_A[0] <= inter_B[1]:
+                if max(inter_A[0], inter_B[0]) <= min(inter_A[1], inter_B[1]):
+                    res.append([max(inter_A[0], inter_B[0]), min(inter_A[1], inter_B[1])])
+            if inter_A[1] <= inter_B[1]:
+                i += 1
+            else:
+                j += 1
+        return res
+```
+</p></details>
+
+## 349. Intersection of Two Arrays
+Given two arrays, write a function to compute their intersection.
+
+<details><summary>sol1</summary>
+<p>
+
+#### Transform into two sets, iterate through one set and check if it's in other set.
+#### time=O(m+n), space=O(m+n)
+
+</p></details>
+
+<details><summary>code</summary>
+<p>
+
+```python
+class Solution:
+    def intersection(self, nums1: List[int], nums2: List[int]) -> List[int]:
+        nums1, nums2 = set(nums1), set(nums2)
+        return [num for num in nums1 if num in nums2]
+```
+</p></details>
+
+<details><summary>sol2</summary>
+<p>
+
+#### Built in set intersection function. set1 & set2
+#### average time=O(m+n), worst time=O(m*n), space=O(m+n)
+
+</p></details>
+
+<details><summary>code</summary>
+<p>
+
+```python
+class Solution:
+    def intersection(self, nums1: List[int], nums2: List[int]) -> List[int]:
+        return set(nums1) & set(nums2)
+```
+</p></details>
+
+## 896. Monotonic Array
+An array is monotonic if it is either monotone increasing or monotone decreasing.  
+An array A is monotone increasing if for all i <= j, A[i] <= A[j].  An array A is monotone decreasing if for all i <= j, A[i] >= A[j].  
+Return true if and only if the given array A is monotonic.  
+
+<details><summary>sol2</summary>
+<p>
+
+#### Using all function.
+#### time=O(n), space=O(1)
+
+</p></details>
+
+<details><summary>code</summary>
+<p>
+
+```python
+class Solution:
+    def isMonotonic(self, A: List[int]) -> bool:
+        if not A:
+            return False
+        if len(A) <= 2:
+            return True
+        return all(A[i] <= A[i+1] for i in range(len(A)-1)) or all(A[i] >= A[i+1] for i in range(len(A)-1)) 
+```
+</p></details>
+
+<details><summary>sol2</summary>
+<p>
+
+#### Two variables increasing and decreasing initialized as True. Iterate through the list and change to False if violating.
+#### time=O(n), space=O(1)
+
+</p></details>
+
+<details><summary>code</summary>
+<p>
+
+```python
+class Solution:
+    def isMonotonic(self, A: List[int]) -> bool:
+        increasing = decreasing = True
+        for i in range(len(A)-1):
+            if A[i] < A[i+1]:
+                decreasing = False
+            if A[i] > A[i+1]:
+                increasing = False
+        return increasing or decreasing
+```
+</p></details>
+
+## 825. Friends Of Appropriate Ages
+Some people will make friend requests. The list of their ages is given and ages[i] is the age of the ith person.  
+Person A will NOT friend request person B (B != A) if any of the following conditions are true:  
+age[B] <= 0.5 * age[A] + 7  
+age[B] > age[A]  
+age[B] > 100 && age[A] < 100  
+Otherwise, A will friend request B.  
+Note that if A requests B, B does not necessarily request A.  Also, people will not friend request themselves.  
+How many total friend requests are made?  
+
+
+
+<details><summary>sol</summary>
+<p>
+
+#### Ask: what's the age range? 
+#### Use counter for ages. Remember people don't add themselves.
+#### time=O(120*120), space=O(120)
+
+</p></details>
+
+<details><summary>code</summary>
+<p>
+
+```python
+class Solution:
+    def numFriendRequests(self, ages: List[int]) -> int:
+        c = collections.Counter(ages)
+        res = 0
+        for age1 in c:
+            for age2 in c:
+                if age2 > age1 or age2 <= age1 * 0.5 + 7:
+                    continue
+                res += c[age1] * c[age2]
+                # people don't request themselves
+                if age1 == age2:
+                    res -= c[age1]
+        return res
+        
+        
+```
+</p></details>
+
+## 15. 3Sum
+Given an array nums of n integers, are there elements a, b, c in nums such that a + b + c = 0? Find all unique triplets in the array which gives the sum of zero.  
+Note:  
+The solution set must not contain duplicate triplets.  
+
+<details><summary>sol</summary>
+<p>
+
+#### sort first. use ith element as the first number, perform 2Sum in its right. Repeating nums are annoying. Each i’th num has to compare with the previous one. Continue if they're the same.
+#### time=O(n^2), space=O(1)
+
+</p></details>
+
+<details><summary>code</summary>
+<p>
+
+```python
+class Solution:
+    def threeSum(self, nums: List[int]) -> List[List[int]]:
+        nums.sort()
+        def twoSum(i, j, target):
+            ans = []
+            while i < j:
+                cur = nums[i] + nums[j]
+                if cur == target:
+                    ans.append([nums[i], nums[j]])
+                    i += 1
+                    j -= 1
+                    while i > 0 and i < len(nums) and nums[i] == nums[i-1]:
+                        i += 1
+                    while j < len(nums)-1 and j > 0 and nums[j] == nums[j+1]:
+                        j -= 1
+                elif cur < target:
+                    i += 1
+                else:
+                    j -= 1
+            return ans
+        
+        res = []
+        for i, num in enumerate(nums):
+            if i > 0 and num == nums[i-1]:
+                continue
+            ans = twoSum(i+1, len(nums)-1, -num)
+            for a in ans:
+                res.append([nums[i], a[0], a[1]])
+        return res
+
+```
+</p></details>
+
+## 31. Next Permutation
+Implement next permutation, which rearranges numbers into the lexicographically next greater permutation of numbers.  
+If such arrangement is not possible, it must rearrange it as the lowest possible order (ie, sorted in ascending order).  
+The replacement must be in-place and use only constant extra memory.  
+
+<details><summary>sol</summary>
+<p>
+
+#### Start from the end of the list, find the first element which is smaller than its next. Second, from its next to the end, find the smallest number which is bigger than the element. Swap the element with the it, and then reverse the rest of the list.
+#### time = O(n), space = O(1)
+
+</p></details>
+
+<details><summary>code</summary>
+<p>
+
+```python
+class Solution:
+    def nextPermutation(self, nums: List[int]) -> None:
+        """
+        Do not return anything, modify nums in-place instead.
+        """
+        #12431 -> 13122
+        def reverse(start, end):
+            while start < end:
+                nums[start], nums[end] = nums[end], nums[start]
+                start, end = start + 1, end - 1
+        less_than_next = len(nums) - 2
+        while less_than_next >= 0:
+            if nums[less_than_next] < nums[less_than_next+1]:
+                break
+            less_than_next -= 1
+        if less_than_next == -1:
+            # reverse-sorted
+            reverse(0, len(nums)-1)
+        else:
+            i = len(nums)-1
+            while i > less_than_next:
+                if nums[i] > nums[less_than_next]:
+                    break
+                i -= 1
+            nums[i], nums[less_than_next] = nums[less_than_next], nums[i]
+            reverse(less_than_next+1, len(nums)-1)
+```
+</p></details>
+
+## 98. Validate Binary Search Tree
+Given a binary tree, determine if it is a valid binary search tree (BST).  
+Assume a BST is defined as follows:  
+The left subtree of a node contains only nodes with keys less than the node's key.  
+The right subtree of a node contains only nodes with keys greater than the node's key.  
+Both the left and right subtrees must also be binary search trees.
+
+<details><summary>sol1</summary>
+<p>
+
+#### in order traversal of BST should output sorted nums.
+#### time=O(n), space=O(h)
+
+</p></details>
+
+<details><summary>code</summary>
+<p>
+
+```python
+class Solution:
+    def isValidBST(self, root: TreeNode) -> bool:
+        self.prev = None
+        self.res = True
+        def inorder(node):
+            if not node:
+                return
+            inorder(node.left)
+            if self.prev != None:
+                if self.prev >= node.val:
+                    self.res = False
+            self.prev = node.val
+            inorder(node.right)
+        inorder(root)
+        return self.res
+```
+</p></details>
+
+<details><summary>sol12</summary>
+<p>
+
+#### iterative
+#### time=O(n), space=O(h)
+
+</p></details>
+
+<details><summary>code</summary>
+<p>
+
+```python
+class Solution:
+    def isValidBST(self, root: TreeNode) -> bool:
+        prev = None
+        stack = []
+        while root or stack:
+            while root:
+                stack.append(root)
+                root = root.left
+            
+            root = stack.pop()
+            if prev != None and prev >= root.val:
+                return False
+            prev = root.val
+            root = root.right
+        return True
+```
+</p></details>
+
+## 199. Binary Tree Right Side View
+Given a binary tree, imagine yourself standing on the right side of it, return the values of the nodes you can see ordered from top to bottom.  
+
+<details><summary>sol1</summary>
+<p>
+
+#### DFS. right first.
+#### time=O(n), space=O(h)
+
+</p></details>
+
+<details><summary>code</summary>
+<p>
+
+```python
+class Solution:
+    def rightSideView(self, root: TreeNode) -> List[int]:
+        res = []
+        def dfs(node, level):
+            if not node:
+                return
+            if level > len(res):
+                res.append(node.val)
+            dfs(node.right, level + 1)
+            dfs(node.left, level + 1)
+        dfs(root, 1)
+        return res
+```
+</p></details>
+
+<details><summary>sol2</summary>
+<p>
+
+#### BFS. right first.
+#### time=O(n), space=O(n) (complete binary tree size=0.5n)
+
+</p></details>
+
+<details><summary>code</summary>
+<p>
+
+```python
+class Solution:
+    def rightSideView(self, root: TreeNode) -> List[int]:
+        res = []
+        if not root:
+            return []
+        queue = [(root, 1)]
+        while queue:
+            node, level = queue.pop(0)
+            if level > len(res):
+                res.append(node.val)
+            if node.right:
+                queue.append((node.right, level+1))
+            if node.left:
+                queue.append((node.left, level+1))
+        return res
+```
+</p></details>
+
+## 56. Merge Intervals
+Given a collection of intervals, merge all overlapping intervals.
+
+<details><summary>sol</summary>
+<p>
+
+#### sort first. compare res[-1]'s end and interval's start. 
+#### time=O(nlogn), space=O(1)
+
+</p></details>
+
+<details><summary>code</summary>
+<p>
+
+```python
+class Solution:
+    def merge(self, intervals: List[List[int]]) -> List[List[int]]:
+        res = []
+        intervals.sort(key=lambda x: x[0])
+        for interval in intervals:
+            if not res:
+                res.append(interval)
+            else:
+                end_time = res[-1][1]
+                if interval[0] > end_time:
+                    res.append(interval)
+                else:
+                    res[-1] = [res[-1][0], max(res[-1][1], interval[1])]
+        return res
+```
+</p></details>
+
+## 133. Clone Graph
+Given the head of a graph, return a deep copy (clone) of the graph. Each node in the graph contains a label (int) and a list (List[UndirectedGraphNode]) of its neighbors. There is an edge between the given node and each of the nodes in its neighbors.
+
+<details><summary>sol</summary>
+<p>
+
+#### case : is there node pointing to itself? is there repeated edges?
+#### use a global dictionary to store nodes. solve it recursively. create the new node first before visiting the neighbors.
+#### time=O(nm) where m is the number of edges, space=O(nm)
+
+</p></details>
+
+<details><summary>code</summary>
+<p>
+
+```python
+class Solution:
+    def __init__(self):
+        self.nodes = {}
+    def cloneGraph(self, node: 'Node') -> 'Node':
+        if node.val in self.nodes:
+            return self.nodes[node.val]
+        new_neighbors = []
+        # have to create object first, otherwise will have recursion loop between neighbors
+        new_node = Node(node.val, [])
+        self.nodes[node.val] = new_node
+        for neighbor in node.neighbors:
+            new_node.neighbors.append(self.cloneGraph(neighbor))
+        return new_node
+
+```
+</p></details>
+
+<details><summary>sol2</summary>
+<p>
+
+#### Python built-in copy library
+#### time=O(nm) where m is the number of edges, space=O(nm)
+
+</p></details>
+
+<details><summary>code</summary>
+<p>
+
+```python
+class Solution:
+    def cloneGraph(self, node: 'Node') -> 'Node':
+        import copy
+        return copy.deepcopy(node)
+
+```
+</p></details>
+
+## 157. Read N Characters Given Read4
+Given a file and assume that you can only read the file using a given method read4, implement a method to read n characters.
+
+<details><summary>sol</summary>
+<p>
+
+#### use read4 to load data into a current buffer.
+#### time=O(n), space=O(1)
+
+</p></details>
+
+<details><summary>code</summary>
+<p>
+
+```python
+class Solution(object):
+    def read(self, buf, n):
+        """
+        :type buf: Destination buffer (List[str])
+        :type n: Maximum number of characters to read (int)
+        :rtype: The number of characters read (int)
+        """
+        res = 0
+        while True:
+            b = [""] * 4
+            cur = min(read4(b), n-res)
+            for i in range(cur):
+                buf[res] = b[i]
+                res += 1
+            if res == n or cur < 4:
+                return res
+```
+</p></details>
+
+## 23. Merge k Sorted Lists:
+Merge k sorted linked lists and return it as one sorted list. Analyze and describe its complexity.  
+
+<details><summary>sol</summary>
+<p>
+
+#### Use priority queue to save the first node of each list, get the node with lowest value and put the next node of it into the priority queue.  
+#### test case: [], [[]], empty head in lists.
+#### time = O(nlog(k)), space=O(k)
+
+</p></details>
+
+<details><summary>code</summary>
+<p>
+
+```python
+class Solution(object):
+    def mergeKLists(self, lists):
+        """
+        :type lists: List[ListNode]
+        :rtype: ListNode
+        """
+        from Queue import PriorityQueue
+        head = node = ListNode(None)
+        pq = PriorityQueue()
+        for l in lists:
+            if l:
+                # (there are 2 brackets, the inner one is for tuple(key, item))
+                pq.put((l.val, l))
+        # while pq is not valid, will loop infinitely
+        while pq.qsize()>0:
+            # will delete the first item in priority queue and return the item
+            cur = pq.get()[1]
+            if cur.next:
+                pq.put((cur.next.val, cur.next))
+            node.next = cur
+            node = node.next
+        return head.next
+```
+</p></details>
+
+<details><summary>sol2</summary>
+<p>
+
+#### heapq min-heap. Note that in heapq, when there's a tie in the first value, it'll use the second value to compare. Since the ListNode class doesn't support comparing, we will get error. To solve this problem, we have to add triple(val, counter, node) into heap. So we'll use counter to compare when there's a tie.
+#### time = O(nlog(k)), space=O(k)
+
+</p></details>
+
+<details><summary>code</summary>
+<p>
+
+```python
+class Solution:
+    def mergeKLists(self, lists: List[ListNode]) -> ListNode:
+        # 2 OK solutions, 1 a bit hard solution 
+        import heapq
+        heap = []
+        dummy = cur = ListNode(0)
+        i = 0
+        for head in lists:
+            if head:
+                heapq.heappush(heap, (head.val, i, head))
+                i += 1
+        while heap:
+            cur_node = heapq.heappop(heap)[2]
+            if cur_node.next:
+                heapq.heappush(heap, (cur_node.next.val, i, cur_node.next))
+                i += 1
+            cur.next = cur_node
+            cur = cur.next
+        return dummy.next
+
+```
+</p></details>
+
 ## 291.
 description
 
@@ -919,6 +2097,121 @@ description
 <p>
 
 #### hint
+#### time and space
+
+</p></details>
+
+<details><summary>code</summary>
+<p>
+
+```python
+code
+```
+</p></details>
+
+## 291.
+description
+
+<details><summary>sol</summary>
+<p>
+
+#### hint
+#### time and space
+
+</p></details>
+
+<details><summary>code</summary>
+<p>
+
+```python
+code
+```
+</p></details>
+
+## 291.
+description
+
+<details><summary>sol</summary>
+<p>
+
+#### hint
+#### time and space
+
+</p></details>
+
+<details><summary>code</summary>
+<p>
+
+```python
+code
+```
+</p></details>
+
+## 291.
+description
+
+<details><summary>sol</summary>
+<p>
+
+#### hint
+#### time and space
+
+</p></details>
+
+<details><summary>code</summary>
+<p>
+
+```python
+code
+```
+</p></details>
+
+## 291.
+description
+
+<details><summary>sol</summary>
+<p>
+
+#### hint
+#### time and space
+
+</p></details>
+
+<details><summary>code</summary>
+<p>
+
+```python
+code
+```
+</p></details>
+
+## 291.
+description
+
+<details><summary>sol</summary>
+<p>
+
+#### hint
+#### time and space
+
+</p></details>
+
+<details><summary>code</summary>
+<p>
+
+```python
+code
+```
+</p></details>
+
+## 291.
+description
+
+<details><summary>sol</summary>
+<p>
+
+#### hint
+#### time and space
 
 </p></details>
 
