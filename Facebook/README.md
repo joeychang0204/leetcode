@@ -2090,14 +2090,14 @@ class Solution:
 ```
 </p></details>
 
-## 291.
-description
+## 543. Diameter of Binary Tree
+Given a binary tree, you need to compute the length of the diameter of the tree. The diameter of a binary tree is the length of the longest path between any two nodes in a tree. This path may or may not pass through the root.  
 
 <details><summary>sol</summary>
 <p>
 
-#### hint
-#### time and space
+#### easy recursion.
+#### time=O(n), space=O(h)
 
 </p></details>
 
@@ -2105,18 +2105,32 @@ description
 <p>
 
 ```python
-code
+class Solution:
+    def diameterOfBinaryTree(self, root: TreeNode) -> int:
+        self.res = 0
+        def getDiameter(node):
+            if not node:
+                return 0
+            l = getDiameter(node.left)
+            r = getDiameter(node.right)
+            self.res = max(self.res, l + r)
+            return max(l, r) + 1
+        getDiameter(root)
+        return self.res
 ```
 </p></details>
 
-## 291.
-description
+## 317. Shortest Distance from All Buildings
+You want to build a house on an empty land which reaches all buildings in the shortest amount of distance. You can only move up, down, left and right. You are given a 2D grid of values 0, 1 or 2, where:  
+Each 0 marks an empty land which you can pass by freely.  
+Each 1 marks a building which you cannot pass through.  
+Each 2 marks an obstacle which you cannot pass through.  
 
 <details><summary>sol</summary>
 <p>
 
-#### hint
-#### time and space
+#### BFS from each building, get the distance to each empty land. 
+#### time=O(mn*mn) space=O(mn)
 
 </p></details>
 
@@ -2124,7 +2138,36 @@ description
 <p>
 
 ```python
-code
+class Solution:
+    def shortestDistance(self, grid: List[List[int]]) -> int:
+        if not grid or not grid[0]:
+            return -1
+        m, n = len(grid), len(grid[0])
+        distance = [[0] * n for _ in range(m)]
+        for i in range(m):
+            for j in range(n):
+                # Do BFS from each building
+                if grid[i][j] == 1:
+                    cur_distance = [[float('inf')] * n for _ in range(m)]
+                    queue = [(i+1, j, 1), (i, j+1, 1), (i-1,j, 1), (i,j-1, 1)]
+                    while queue:
+                        row, col, dist = queue.pop(0)
+                        if not 0 <= row < m or not 0 <= col < n:
+                            continue
+                        # when meeting obstacles/buildings, or revisit, continue
+                        if grid[row][col] != 0 or dist >= cur_distance[row][col]:
+                            continue
+                        cur_distance[row][col] = dist
+                        for new_row, new_col in [(row+1, col), (row-1, col), (row,col+1), (row,col-1)]:
+                            queue.append((new_row, new_col, dist + 1))
+                    for x in range(m):
+                        for y in range(n):
+                            distance[x][y] += cur_distance[x][y]
+        res = float('inf')
+        for x in range(m):
+            for y in range(n):
+                res = min(res, distance[x][y])
+        return -1 if res == float('inf') else res
 ```
 </p></details>
 
